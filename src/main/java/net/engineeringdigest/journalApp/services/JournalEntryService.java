@@ -1,7 +1,11 @@
 package net.engineeringdigest.journalApp.services;
 
 import net.engineeringdigest.journalApp.entity.JournalEntry;
+import net.engineeringdigest.journalApp.entity.User;
+import net.engineeringdigest.journalApp.exception.JournalEntryNotFoundException;
+import net.engineeringdigest.journalApp.exception.UserNotFoundException;
 import net.engineeringdigest.journalApp.repository.JournalEntryRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,45 +19,52 @@ public class JournalEntryService {
     @Autowired
     private JournalEntryRepository journalEntryRepository;
 
-    public JournalEntry saveEntry(JournalEntry journalEntry){
-        JournalEntry entry = journalEntryRepository.save(journalEntry);
-        return entry;
+    @Autowired
+    private UserService userService;
+
+    public void saveEntry(JournalEntry journalEntry, String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Username not found"));
+        journalEntry.setDate(LocalDateTime.now());
+        JournalEntry saved = journalEntryRepository.save(journalEntry);
+        user.getJournalEntries().add(saved);
+        userService.saveUser(user);
     }
 
-    public JournalEntry getEntry(String id){
-        Optional<JournalEntry> optional = journalEntryRepository.findById(id);
-        if(optional.isPresent()){
-            return optional.get();
-        }
-        return null;
+    public List<JournalEntry> getAllJournalEntriesOfUser(String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Username not found"));
+        List<JournalEntry> journalEntries = user.getJournalEntries();
+        return journalEntries;
     }
 
-    public List<JournalEntry> getEntries(){
-        return journalEntryRepository.findAll();
+    public JournalEntry getJournalEntryById(ObjectId id) {
+        JournalEntry journalEntry = journalEntryRepository.findById(id)
+                .orElseThrow(() -> new JournalEntryNotFoundException("Invalid JournalEntry Id"));
+        return journalEntry;
     }
 
     public List<JournalEntry> getAllEntries() {
         return journalEntryRepository.findAll();
     }
 
-    public JournalEntry deleteEntry(String myId) {
-        Optional<JournalEntry> optional = journalEntryRepository.findById(myId);
-        if(optional.isPresent()){
-            JournalEntry journalEntry = optional.get();
-            journalEntryRepository.delete(journalEntry);
-        }
-        return journalEntryRepository.findById(myId).get();
+    public void deleteEntry(ObjectId myId, String username) {
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Username not found"));
+        user.getJournalEntries().remove(getJournalEntryById(myId));
+        userService.saveUser(user);
     }
 
-    public JournalEntry updateEntry(String myId, JournalEntry newEntry) {
-        Optional<JournalEntry> optional = journalEntryRepository.findById(myId);
-        if(optional.isPresent()){
-            JournalEntry oldEntry = optional.get();
-            oldEntry.setTitle(newEntry.getTitle());
-            oldEntry.setContent(newEntry.getContent());
-            oldEntry.setDate(LocalDateTime.now());
-            return journalEntryRepository.save(oldEntry);
-        }
-        return null;
+    public void updateEntry(ObjectId myId, String username, JournalEntry newEntry) {
+        JournalEntry oldEntry = journalEntryRepository.findById(myId)
+                .orElseThrow(() -> new JournalEntryNotFoundException("Invalid JournalEntry Id"));
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("Username not found"));
+
+        oldEntry.setDate(LocalDateTime.now());
+        oldEntry.setTitle(newEntry.getTitle());
+        oldEntry.setContent(newEntry.getContent());
+        journalEntryRepository.save(oldEntry);
+
     }
 }
