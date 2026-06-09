@@ -6,7 +6,10 @@ import net.engineeringdigest.journalApp.exception.UserNotFoundException;
 import net.engineeringdigest.journalApp.repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +19,15 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public User saveUser(User user) {
+
+        String password = user.getPassword();
+        password = passwordEncoder.encode(password);
+        user.setPassword(password);
+        user.setRoles(Arrays.asList("USER"));
         User saveUser = userRepository.save(user);
         return saveUser;
     }

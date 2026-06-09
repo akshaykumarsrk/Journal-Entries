@@ -31,4 +31,6 @@ public class User {
     // means it takes reference of JournalEntries
     @DBRef
     private List<JournalEntry> journalEntries = new ArrayList<>();
+
+    private List<String> roles;
 }

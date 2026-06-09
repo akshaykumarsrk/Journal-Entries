@@ -27,7 +27,7 @@ public class JournalEntryControllerV2 {
     UserService userService;
 
 
-    @GetMapping("{username}")
+    @GetMapping("/{username}")
     public ResponseEntity getAllJournalEntriesOfUser(@PathVariable String username)
     {
         List<JournalEntry> entries = journalEntryService.getAllJournalEntriesOfUser(username);
@@ -51,7 +51,7 @@ public class JournalEntryControllerV2 {
         }
     }
 
-    @GetMapping
+    @GetMapping("/id/{id}")
     public ResponseEntity getJournalEntryById(@PathVariable ObjectId id)
     {
          JournalEntry journalEntry = journalEntryService.getJournalEntryById(id);

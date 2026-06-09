@@ -41,9 +41,9 @@ public class UserController {
                 .body(user);
     }
 
-    @PutMapping("/username/{usermane}")
-    public ResponseEntity updateUser(@PathVariable String usermane, @RequestBody User user){
-        userService.updateUser(usermane, user);
+    @PutMapping("/username/{username}")
+    public ResponseEntity updateUser(@PathVariable String username, @RequestBody User user){
+        userService.updateUser(username, user);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body("User Updated Successfully");
