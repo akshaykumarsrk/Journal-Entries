@@ -1,14 +1,30 @@
 package net.engineeringdigest.journalApp.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import net.engineeringdigest.journalApp.entity.User;
+import net.engineeringdigest.journalApp.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class HealtyCheck {
+@RequestMapping("/public")
+public class PublicController {
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/health-check")
     public String HealtyCheck() {
         return "OK";
+    }
+
+    @PostMapping("/create-user")
+    public ResponseEntity<User> createUser(@RequestBody User user){
+        User newUser = userService.saveUser(user);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(newUser);
     }
 }
 

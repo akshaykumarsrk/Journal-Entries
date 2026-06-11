@@ -42,12 +42,8 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public void deleteUser(ObjectId myId) {
-        Optional<User> optional = userRepository.findById(myId);
-        if(optional.isPresent()){
-            User users = optional.get();
-            userRepository.delete(users);
-        }
+    public void deleteUser(String username) {
+        userRepository.deleteByUsername(username);
     }
 
     public Optional<User> findByUsername(String username) {

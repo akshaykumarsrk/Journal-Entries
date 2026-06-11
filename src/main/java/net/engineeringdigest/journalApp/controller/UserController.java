@@ -6,6 +6,8 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,14 +27,6 @@ public class UserController {
                 .body(users);
     }
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user){
-        User newUser = userService.saveUser(user);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(newUser);
-    }
-
     @GetMapping("/{username}")
     public ResponseEntity getUserByUsername(@PathVariable("username") String username){
         User user = userService.getUser(username);
@@ -41,19 +35,25 @@ public class UserController {
                 .body(user);
     }
 
-    @PutMapping("/username/{username}")
-    public ResponseEntity updateUser(@PathVariable String username, @RequestBody User user){
+    @PutMapping("/update-user")
+    public ResponseEntity updateUser(@RequestBody User user){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
         userService.updateUser(username, user);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body("User Updated Successfully");
     }
 
-    @DeleteMapping("/delete/{myId}")
-    public ResponseEntity deleteUser(@PathVariable ObjectId myId){
-        userService.deleteUser(myId);
+    @DeleteMapping("/delete-user")
+    public ResponseEntity deleteUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        userService.deleteUser(username);
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .body("User Deleted Successfully");
     }
+
+
 }
