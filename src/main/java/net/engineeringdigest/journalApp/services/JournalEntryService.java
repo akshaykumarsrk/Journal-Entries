@@ -7,6 +7,8 @@ import net.engineeringdigest.journalApp.exception.UserNotFoundException;
 import net.engineeringdigest.journalApp.repository.JournalEntryRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,11 +29,13 @@ public class JournalEntryService {
     // it makes entry atomic and isolated (ACID Properties)
     @Transactional
     public void saveEntry(JournalEntry journalEntry, String username) {
+
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Username not found"));
+
         journalEntry.setDate(LocalDateTime.now());
-        JournalEntry saved = journalEntryRepository.save(journalEntry);
-        user.getJournalEntries().add(saved);
+        journalEntryRepository.save(journalEntry);
+        user.getJournalEntries().add(journalEntry);
 //        user.setUsername(null);
         userService.saveUser(user);
     }
@@ -43,10 +47,21 @@ public class JournalEntryService {
         return journalEntries;
     }
 
-    public JournalEntry getJournalEntryById(ObjectId id) {
-        JournalEntry journalEntry = journalEntryRepository.findById(id)
-                .orElseThrow(() -> new JournalEntryNotFoundException("Invalid JournalEntry Id"));
-        return journalEntry;
+    public JournalEntry getJournalEntryById(User user, ObjectId id) {
+
+        List<JournalEntry> entries = user.getJournalEntries();
+        if(entries != null && !entries.isEmpty())
+        {
+            for(JournalEntry journalEntry : entries)
+            {
+                ObjectId entryId = journalEntry.getId();
+                if(entryId.equals(id))
+                {
+                    return journalEntry;
+                }
+            }
+        }
+        return null;
     }
 
     public List<JournalEntry> getAllEntries() {
@@ -56,7 +71,11 @@ public class JournalEntryService {
     public void deleteEntry(ObjectId myId, String username) {
         User user = userService.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Username not found"));
-        user.getJournalEntries().remove(getJournalEntryById(myId));
+        List<JournalEntry> entries = user.getJournalEntries();
+        if(entries != null && !entries.isEmpty()){
+            journalEntryRepository.deleteById(myId);
+            entries.remove(myId);
+        }
         userService.saveUser(user);
     }
 
@@ -72,4 +91,8 @@ public class JournalEntryService {
         journalEntryRepository.save(oldEntry);
 
     }
+
+//    public List<JournalEntry> findByUsername(String username) {
+//
+//    }
 }

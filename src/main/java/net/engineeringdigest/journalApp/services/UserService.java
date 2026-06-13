@@ -22,14 +22,16 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public User saveUser(User user) {
+    public User saveNewUser(User user) {
 
-        String password = user.getPassword();
-        password = passwordEncoder.encode(password);
-        user.setPassword(password);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(Arrays.asList("USER"));
         User saveUser = userRepository.save(user);
         return saveUser;
+    }
+
+    public User saveUser(User user) {
+        return userRepository.save(user);
     }
 
     public User getUser(String username) {
@@ -60,5 +62,12 @@ public class UserService {
             oldUser.setPassword(newUser.getPassword());
             saveUser(oldUser);
         }
+    }
+
+    public User createAdminUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(Arrays.asList("USER", "ADMIN"));
+        User saveUser = userRepository.save(user);
+        return saveUser;
     }
 }

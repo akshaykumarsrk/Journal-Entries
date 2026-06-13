@@ -1,5 +1,4 @@
 package net.engineeringdigest.journalApp.services;
-
 import net.engineeringdigest.journalApp.entity.User;
 import net.engineeringdigest.journalApp.exception.UserNotFoundException;
 import net.engineeringdigest.journalApp.repository.UserRepository;
@@ -17,10 +16,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-         User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("Username not found" + username));
 
-         // Convert our User into UserDetails
+        // Convert our User into UserDetails
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
@@ -31,6 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     }
 }
+
 
 // String[] arr = roles.toArray(new String[0]);
 // Step 1- Java receives: new String[0] which is: [] (length = 0)

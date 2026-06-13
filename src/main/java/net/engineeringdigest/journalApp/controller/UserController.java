@@ -27,8 +27,10 @@ public class UserController {
                 .body(users);
     }
 
-    @GetMapping("/{username}")
-    public ResponseEntity getUserByUsername(@PathVariable("username") String username){
+    @GetMapping("/current-user")
+    public ResponseEntity getUserByUsername(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
         User user = userService.getUser(username);
         return ResponseEntity
                 .ok()
