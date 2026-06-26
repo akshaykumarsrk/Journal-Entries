@@ -1,10 +1,13 @@
 package net.engineeringdigest.journalApp.services;
 
 
+import lombok.extern.slf4j.Slf4j;
 import net.engineeringdigest.journalApp.entity.User;
 import net.engineeringdigest.journalApp.exception.UserNotFoundException;
 import net.engineeringdigest.journalApp.repository.UserRepository;
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class UserService {
 
     @Autowired
@@ -21,6 +25,8 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+//    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     public boolean saveNewUser(User user) {
 
@@ -31,6 +37,10 @@ public class UserService {
             return true;
         }
         catch (Exception e) {
+            log.error("Error occurred for {}: ", user.getUsername(), e);
+            log.info("Error occurred for {}: ", user.getUsername(), e);
+            log.debug(e.getMessage());
+            log.trace(Arrays.toString(e.getStackTrace()));
             return false;
         }
     }
